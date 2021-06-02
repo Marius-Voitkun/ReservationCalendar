@@ -61,6 +61,7 @@ td.weekend {
 
 .working {
   background: lightgreen;
+  cursor: pointer;
 }
 
 .working.reserved {

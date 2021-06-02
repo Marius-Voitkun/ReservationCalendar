@@ -7,7 +7,31 @@ document.getElementById('show-table').addEventListener('click', function() {
   buildTable(year, month, numberOfDays, objectOfDays);
 });
 
-let reserved = [];
+let now = new Date();
+
+let reservedTimes = [];
+if (localStorage.getItem('reservedTimes') !== null) {
+  reservedTimes = localStorage.getItem('reservedTimes').split(',');
+}
+
+let reservedTimesFromNow = filterReservedTimesFromNow(reservedTimes);
+console.log(reservedTimes);
+console.log(reservedTimesFromNow);
+
+
+function filterReservedTimesFromNow(reservedTimes) {
+  let nowYear = now.getFullYear();
+  let nowMonth = now.getMonth() + 1;
+  nowMonth = nowMonth < 10 ? `0${nowMonth}` : nowMonth;
+  let nowDay = now.getDate();
+  nowDay = nowDay < 10 ? `0${nowDay}` : nowDay;
+  let nowHour = now.getHours();
+  nowHour = nowHour < 10 ? `0${nowHour}` : nowHour;
+
+  let nowForFiltering = `${nowYear}-${nowMonth}-${nowDay}-${nowHour}`;
+
+  return reservedTimes.filter(time => time > nowForFiltering);
+}
 
 
 function daysInMonth (year, month) {
@@ -73,11 +97,8 @@ function buildObjectOfDays(year, month, numberOfDays) {
 
 
 function buildTable(year, month, numberOfDays, objectOfDays) {
-  const dayNumbers = Object.keys(objectOfDays);
-  const dayNames = Object.values(objectOfDays);
   const namesOfMonths = ['January', 'February', 'March', 'April', 'May', 'June',
     'July', 'August', 'September', 'October', 'November', 'December'];
-  let now = new Date();
   
   let html = `<caption>${year} ${namesOfMonths[month - 1]}</caption>
               <thead><tr><th rowspan="2" scope="col" class="first-column"></th>`;
@@ -102,20 +123,27 @@ function buildTable(year, month, numberOfDays, objectOfDays) {
   
   html += `</tr></thead><tbody>`;
   
+  let monthFormatted = month < 10 ? `0${month}` : month;
+  let dayFormatted;
+  let hourFormatted;
+
   for (let hour = 6; hour <= 22; hour++) {
     html += `<tr><th scope="row" class="hour">${hour}:00</th>`;
+    hourFormatted = hour < 10 ? `0${hour}` : hour;
     
     for (let day = 1; day <= numberOfDays; day++) {
       let date = new Date(year, month - 1, day, hour);
+      dayFormatted = day < 10 ? `0${day}` : day;
+
       if (date.getDay() === 6 || date.getDay() === 0) {
-        html += `<td class="weekend" id="${year}-${month}-${day}-${hour}"></td>`;
+        html += `<td class="weekend" id="${year}-${monthFormatted}-${dayFormatted}-${hourFormatted}"></td>`;
         continue;
       }
       if (date < now) {
-        html += `<td class="past" id="${year}-${month}-${day}-${hour}"></td>`;
+        html += `<td class="past" id="${year}-${monthFormatted}-${dayFormatted}-${hourFormatted}"></td>`;
         continue;
       }
-      html += `<td class="working" id="${year}-${month}-${day}-${hour}"></td>`;
+      html += `<td class="working" id="${year}-${monthFormatted}-${dayFormatted}-${hourFormatted}"></td>`;
     }
     html += `</tr>`;
   }
@@ -125,6 +153,7 @@ function buildTable(year, month, numberOfDays, objectOfDays) {
   document.getElementById('reservation-table').innerHTML = html;
 
   activateWorkingCells();
+  markReservedTimes();
 }
 
 
@@ -138,18 +167,33 @@ function activateWorkingCells() {
 }
 
 
+function markReservedTimes() {
+  for (let cellId of reservedTimes) {
+    try {
+      document.getElementById(cellId).classList.add('reserved');
+    }
+    catch(error) {
+      continue;
+    }
+  }
+}
+
+
 function handleReservation(cellId) {
   const cell = document.getElementById(cellId);  
   
   if (cell.classList.contains('reserved')) {
     cell.classList.remove('reserved');
-    let index = reserved.indexOf(cellId);
-    reserved.splice(index, 1);
+    let index = reservedTimes.indexOf(cellId);
+    reservedTimes.splice(index, 1);
   }
-  else if (reserved.length < 3) {
+  else if (reservedTimesFromNow.length < 3) {
     cell.classList.add('reserved');
-    reserved.push(cellId);
-    reserved.sort();
+    reservedTimes.push(cellId);
+    reservedTimes.sort();
   }
-  console.log(reserved);
+  localStorage.setItem('reservedTimes', reservedTimes);
+  reservedTimesFromNow = filterReservedTimesFromNow(reservedTimes);
+  console.log(reservedTimes);
+  console.log(reservedTimesFromNow);
 }
