@@ -48,13 +48,21 @@ th.weekend {
 }
 
 td.weekend {
-  background: lightpink;
+  background: rgb(255, 50, 50);
 }
 
 .past {
-  background: grey;
+  background: rgb(170, 170, 170);
+}
+
+.past.reserved {
+  background: cyan;
 }
 
 .working {
   background: lightgreen;
+}
+
+.working.reserved {
+  background: blue;
 }

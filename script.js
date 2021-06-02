@@ -5,7 +5,9 @@ document.getElementById('show-table').addEventListener('click', function() {
   const numberOfDays = daysInMonth(year, month);
   const objectOfDays = buildObjectOfDays(year, month, numberOfDays);
   buildTable(year, month, numberOfDays, objectOfDays);
-})
+});
+
+let reserved = [];
 
 
 function daysInMonth (year, month) {
@@ -105,23 +107,49 @@ function buildTable(year, month, numberOfDays, objectOfDays) {
     
     for (let day = 1; day <= numberOfDays; day++) {
       let date = new Date(year, month - 1, day, hour);
-      console.log(date);
       if (date.getDay() === 6 || date.getDay() === 0) {
-        html += `<td class="weekend"></td>`;
+        html += `<td class="weekend" id="${year}-${month}-${day}-${hour}"></td>`;
         continue;
       }
       if (date < now) {
-        html += `<td class="past"></td>`;
+        html += `<td class="past" id="${year}-${month}-${day}-${hour}"></td>`;
         continue;
       }
-      html += `<td class="working"></td>`;
+      html += `<td class="working" id="${year}-${month}-${day}-${hour}"></td>`;
     }
     html += `</tr>`;
   }
   
   html += `</tbody>`;
-    
   
   document.getElementById('reservation-table').innerHTML = html;
+
+  activateWorkingCells();
 }
 
+
+function activateWorkingCells() {
+  let workingCells = document.getElementsByClassName('working');
+  for (let cell of workingCells) {
+    cell.addEventListener('click', function() {
+      handleReservation(cell.id);
+    });
+  }
+}
+
+
+function handleReservation(cellId) {
+  const cell = document.getElementById(cellId);  
+  
+  if (cell.classList.contains('reserved')) {
+    cell.classList.remove('reserved');
+    let index = reserved.indexOf(cellId);
+    reserved.splice(index, 1);
+  }
+  else if (reserved.length < 3) {
+    cell.classList.add('reserved');
+    reserved.push(cellId);
+    reserved.sort();
+  }
+  console.log(reserved);
+}
