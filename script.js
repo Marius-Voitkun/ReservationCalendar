@@ -75,25 +75,6 @@ function buildObjectOfDays(year, month, numberOfDays) {
 
   return objectOfDays;
 }
-// function buildArrayOfDayNames(year, month, numberOfDays) {
-//   const date = new Date(year, month - 1, 1);
-//   const firstDay = date.getDay();
-//   const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
-
-//   let arrayOfDayNames = [];
-//   let dayIndex = firstDay - 1;
-//   let dayName = days[firstDay - 1];
-
-//   for (let i = 1; i <= numberOfDays; i++) {
-//     arrayOfDayNames.push(dayName);
-//     if (dayIndex === 6)
-//       dayIndex = 0;
-//     else dayIndex += 1;
-//     dayName = days[dayIndex]
-//   }
-
-//   return arrayOfDayNames;
-// }
 
 
 function buildTable(year, month, numberOfDays, objectOfDays) {
@@ -154,6 +135,7 @@ function buildTable(year, month, numberOfDays, objectOfDays) {
 
   activateWorkingCells();
   markReservedTimes();
+  setCursorState();
 }
 
 
@@ -179,8 +161,26 @@ function markReservedTimes() {
 }
 
 
+function setCursorState() {
+  let workingCells = document.getElementsByClassName('working');
+  
+  if (reservedTimesFromNow.length < 3)
+    for (let cell of workingCells)
+      cell.style = 'cursor: pointer';
+
+  if (reservedTimesFromNow.length === 3) {
+    for (let cell of workingCells) {
+      if (cell.classList.contains('reserved'))
+        cell.style = 'cursor: pointer';
+      else
+        cell.style = 'cursor: auto';
+    }
+  }
+}
+
+
 function handleReservation(cellId) {
-  const cell = document.getElementById(cellId);  
+  const cell = document.getElementById(cellId);
   
   if (cell.classList.contains('reserved')) {
     cell.classList.remove('reserved');
@@ -192,8 +192,11 @@ function handleReservation(cellId) {
     reservedTimes.push(cellId);
     reservedTimes.sort();
   }
+  
   localStorage.setItem('reservedTimes', reservedTimes);
   reservedTimesFromNow = filterReservedTimesFromNow(reservedTimes);
   console.log(reservedTimes);
-  console.log(reservedTimesFromNow);
+  console.log(reservedTimesFromNow);  
+
+  setCursorState();
 }
