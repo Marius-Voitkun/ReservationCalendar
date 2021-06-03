@@ -48,7 +48,7 @@ th.weekend {
 }
 
 td.weekend {
-  background: rgb(255, 50, 50);
+  background: rgb(255, 100, 100);
 }
 
 .past {
@@ -60,9 +60,25 @@ td.weekend {
 }
 
 .working {
-  background: lightgreen;
+  background: rgb(255, 255, 130);
 }
 
 .working.reserved {
   background: blue;
+}
+
+#reserved-times > div {
+  display: inline-block;
+  width: 50%;
+  vertical-align: top;
+}
+
+#reserved-times h3 {
+  margin-bottom: 0.5rem;
+}
+
+#reserved-times ol {
+  margin-top: 0.5rem;
+  letter-spacing: 0.1rem;
+  word-spacing: 0.7rem;
 }

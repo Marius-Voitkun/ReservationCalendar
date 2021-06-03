@@ -5,6 +5,7 @@ document.getElementById('show-table').addEventListener('click', function() {
   const numberOfDays = daysInMonth(year, month);
   const objectOfDays = buildObjectOfDays(year, month, numberOfDays);
   buildTable(year, month, numberOfDays, objectOfDays);
+  showReservedTimes();
 });
 
 let now = new Date();
@@ -14,12 +15,14 @@ if (localStorage.getItem('reservedTimes') !== null) {
   reservedTimes = localStorage.getItem('reservedTimes').split(',');
 }
 
-let reservedTimesFromNow = filterReservedTimesFromNow(reservedTimes);
+let reservedTimesFromNow = filterReservedTimes(reservedTimes)[0];
+let reservedTimesInPast = filterReservedTimes(reservedTimes)[1];
 console.log(reservedTimes);
 console.log(reservedTimesFromNow);
+console.log(reservedTimesInPast);
 
 
-function filterReservedTimesFromNow(reservedTimes) {
+function filterReservedTimes(reservedTimes) {
   let nowYear = now.getFullYear();
   let nowMonth = now.getMonth() + 1;
   nowMonth = nowMonth < 10 ? `0${nowMonth}` : nowMonth;
@@ -30,7 +33,10 @@ function filterReservedTimesFromNow(reservedTimes) {
 
   let nowForFiltering = `${nowYear}-${nowMonth}-${nowDay}-${nowHour}`;
 
-  return reservedTimes.filter(time => time > nowForFiltering);
+  let reservedTimesFromNow = reservedTimes.filter(time => time > nowForFiltering);
+  let reservedTimesInPast = reservedTimes.filter(time => time <= nowForFiltering);
+
+  return [reservedTimesFromNow, reservedTimesInPast];
 }
 
 
@@ -194,9 +200,40 @@ function handleReservation(cellId) {
   }
   
   localStorage.setItem('reservedTimes', reservedTimes);
-  reservedTimesFromNow = filterReservedTimesFromNow(reservedTimes);
+  reservedTimesFromNow = filterReservedTimes(reservedTimes)[0];
   console.log(reservedTimes);
   console.log(reservedTimesFromNow);  
 
+  showReservedTimes();
   setCursorState();
+}
+
+
+function showReservedTimes() {
+  let section = document.getElementById('reserved-times');
+  let html = ``;
+
+  if (reservedTimesFromNow.length !== 0) {
+    html += `<div><h3>Reserved times:</h3><ol>`;
+
+    reservedTimesFromNow.forEach(cellId => {
+      time = cellId.split('-');
+      html += `<li>${time[0]}-${time[1]}-${time[2]} ${time[3]}:00</li>`;
+    });
+
+    html += `</ol></div>`;
+  }
+
+  if (reservedTimesInPast.length !== 0) {
+    html += `<div><h3>Reserved times in past:</h3><ol>`;
+
+    reservedTimesInPast.forEach(cellId => {
+      time = cellId.split('-');
+      html += `<li>${time[0]}-${time[1]}-${time[2]} ${time[3]}:00</li>`;
+    });
+
+    html += `</ol></div>`;
+  }
+
+  section.innerHTML = html;
 }
